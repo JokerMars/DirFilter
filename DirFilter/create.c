@@ -110,7 +110,7 @@ PreCreate(
 		DbgPrint("\tFile Extension: %wZ\n", nameInfo->Extension);
 
 		
-		path.MaximumLength = nameInfo->Name.MaximumLength + 10 * sizeof(WCHAR);
+	/*	path.MaximumLength = nameInfo->Name.MaximumLength + 10 * sizeof(WCHAR);
 		path.Buffer = ExAllocatePool(NonPagedPool, path.MaximumLength);
 
 		RtlAppendUnicodeStringToString(&path, &nameInfo->Name);
@@ -144,7 +144,7 @@ PreCreate(
 		}
 
 		DbgPrint("\tFile Created!\n");
-
+*/
 
 
 		retVal = FLT_PREOP_SUCCESS_WITH_CALLBACK;

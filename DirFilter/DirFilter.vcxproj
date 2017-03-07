@@ -37,6 +37,7 @@
   <ItemGroup>
     <ClCompile Include="fileFunc.c" />
     <ClCompile Include="proc.c" />
+    <ClCompile Include="setinfo.c" />
     <ResourceCompile Include="DirFilter.rc" />
     <ClCompile Include="create.c" />
     <ClCompile Include="DirFilter.c" />
