@@ -83,6 +83,13 @@ CONST FLT_OPERATION_REGISTRATION Callbacks[] = {
 		PostSetInfo
 	},
 
+	{
+		IRP_MJ_CLEANUP,
+		0,
+		PreCleanup,
+		NULL
+	},
+
     { IRP_MJ_OPERATION_END }
 };
 

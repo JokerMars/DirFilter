@@ -42,6 +42,9 @@
     <ClCompile Include="ctx.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cleanup.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DirFilter.rc">

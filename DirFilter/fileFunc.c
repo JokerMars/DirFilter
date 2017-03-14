@@ -308,8 +308,8 @@ ULONG CreateOrOpenFileWithFlag(
 		}
 
 
-
-		DbgPrint("\nIRP_MJ_CREATE\n");
+		if (CreateDisposition == FILE_OPEN)
+			DbgPrint("\nIRP_MJ_CREATE\n");
 		DbgPrint("\tFile Name: %wZ\n", nameInfo->Name);
 		DbgPrint("\tFile Extension: %wZ\n", nameInfo->Extension);
 
@@ -344,7 +344,8 @@ ULONG CreateOrOpenFileWithFlag(
 		if (!NT_SUCCESS(status))
 		{
 			DbgPrint("\tIoStatus.Info: %d\n", ioStatus.Information);
-			DbgPrint("****IoStatus Status: %d\n", ioStatus.Status);
+			DbgPrint("\tIoStatus Status: %d\n", ioStatus.Status);
+			DbgPrint("********CREATE OR OPEN Failed**********\n");
 
 			retVal = RET_CREATE_OPEN_FAIL;
 

@@ -35,6 +35,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="cleanup.c" />
     <ClCompile Include="ctx.c" />
     <ClCompile Include="fileFunc.c" />
     <ClCompile Include="proc.c" />
