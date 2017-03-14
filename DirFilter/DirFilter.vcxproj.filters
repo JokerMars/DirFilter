@@ -39,6 +39,9 @@
     <ClCompile Include="setinfo.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ctx.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DirFilter.rc">
@@ -56,6 +59,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="fileFunc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ctx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -29,6 +29,10 @@ VOID ClearCipherExtensionList();
 
 VOID ClearNodeList(PLIST_ENTRY head);
 
+BOOLEAN AddFileFlag(
+	PFLT_CALLBACK_DATA Data,
+	PCFLT_RELATED_OBJECTS FltObjects
+);
 
 
 
