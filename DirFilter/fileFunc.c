@@ -152,9 +152,7 @@ BOOLEAN IsMonitoredPath(PUNICODE_STRING dosName)
 
 }
 
-/*
-添加附加数据流，同时，过滤文件类型
-*/
+
 BOOLEAN AddFileFlag(
 	PFLT_CALLBACK_DATA Data,
 	PCFLT_RELATED_OBJECTS FltObjects
@@ -172,10 +170,6 @@ BOOLEAN AddFileFlag(
 
 	try
 	{
-		if (!NT_SUCCESS(Data->IoStatus.Status))
-		{
-			leave;
-		}
 
 		status = FltGetFileNameInformation(Data,
 			FLT_FILE_NAME_OPENED | FLT_FILE_NAME_QUERY_FILESYSTEM_ONLY,
@@ -202,7 +196,7 @@ BOOLEAN AddFileFlag(
 
 
 
-		DbgPrint("\nIRP_MJ_CREATE:\n");
+		DbgPrint("\nIRP_MJ_CREATE\n");
 		DbgPrint("\tFile Name: %wZ\n", nameInfo->Name);
 		DbgPrint("\tFile Extension: %wZ\n", nameInfo->Extension);
 
@@ -267,5 +261,116 @@ BOOLEAN AddFileFlag(
 
 
 	return FALSE;
+}
 
+
+BOOLEAN CreateOrOpenFileWithFlag(
+	PFLT_CALLBACK_DATA Data,
+	PCFLT_RELATED_OBJECTS FltObjects,
+	ULONG CreateDisposition
+)
+{
+	NTSTATUS status;
+	HANDLE hFile = NULL;
+	IO_STATUS_BLOCK ioStatus;
+
+	OBJECT_ATTRIBUTES oa;
+	UNICODE_STRING path = { 0 };
+	PFLT_FILE_NAME_INFORMATION nameInfo = NULL;
+
+	try
+	{
+
+		status = FltGetFileNameInformation(Data,
+			FLT_FILE_NAME_OPENED | FLT_FILE_NAME_QUERY_FILESYSTEM_ONLY,
+			&nameInfo
+		);
+		if (!NT_SUCCESS(status))
+		{
+			leave;
+		}
+		status = FltParseFileNameInformation(nameInfo);
+		if (!NT_SUCCESS(status))
+		{
+			leave;
+		}
+
+		//
+		// 文件后缀名
+		//
+
+		if (!IsMonitoredExtension(&(nameInfo->Extension)))
+		{
+			leave;
+		}
+
+
+
+		DbgPrint("\nIRP_MJ_CREATE\n");
+		DbgPrint("\tFile Name: %wZ\n", nameInfo->Name);
+		DbgPrint("\tFile Extension: %wZ\n", nameInfo->Extension);
+
+
+		path.MaximumLength = nameInfo->Name.MaximumLength + 10 * sizeof(WCHAR);
+		path.Buffer = ExAllocatePool(NonPagedPool, path.MaximumLength);
+
+		RtlAppendUnicodeStringToString(&path, &nameInfo->Name);
+		RtlAppendUnicodeToString(&path, L":flag");
+
+		DbgPrint("\tFile Name: %wZ\n", path);
+
+		InitializeObjectAttributes(&oa, &path, OBJ_CASE_INSENSITIVE, NULL, NULL);
+
+
+		status = FltCreateFile(FltObjects->Filter,
+			FltObjects->Instance,
+			&hFile,
+			GENERIC_READ,
+			&oa,
+			&ioStatus,
+			NULL,
+			FILE_ATTRIBUTE_HIDDEN,
+			FILE_SHARE_READ,
+			CreateDisposition,
+			FILE_WRITE_THROUGH,
+			NULL,
+			0,
+			IO_IGNORE_SHARE_ACCESS_CHECK
+		);
+
+		if (!NT_SUCCESS(status))
+		{
+			DbgPrint("\tIoStatus.Info: %d\n", ioStatus.Information);
+			DbgPrint("****IoStatus Status: %d\n", ioStatus.Status);
+			leave;
+		}
+
+		if (CreateDisposition == FILE_CREATE)
+			DbgPrint("\tFile Created!\n");
+		else
+			DbgPrint("\tFile Opened!\n");
+
+
+
+		return TRUE;
+	}
+	finally
+	{
+		if (nameInfo)
+		{
+			FltReleaseFileNameInformation(nameInfo);
+		}
+
+		if (path.Buffer)
+		{
+			ExFreePool(path.Buffer);
+		}
+
+		if (hFile)
+		{
+			FltClose(hFile);
+		}
+	}
+
+	return FALSE;
 }

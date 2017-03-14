@@ -6,6 +6,7 @@
 #include "common.h"
 #include "proc.h"
 #include "fileFunc.h"
+#include "ctx.h"
 
 
 FLT_PREOP_CALLBACK_STATUS

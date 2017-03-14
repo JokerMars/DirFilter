@@ -15,6 +15,19 @@ typedef struct _STREAM_CONTEXT
 }STREAM_CONTEXT, *PSTREAM_CONTEXT;
 
 
+#define STREAM_CONTEXT_SIZE sizeof(STREAM_CONTEXT)
+#define STREAM_CONTEXT_TAG	'SCTA'
+
+
+NTSTATUS
+Ctx_FindOrCreateStreamContext(
+	_In_ PFLT_CALLBACK_DATA Data,
+	_In_ PCFLT_RELATED_OBJECTS FltObjects,
+	_In_ BOOLEAN CreateIfNotFound,
+	_Out_ PSTREAM_CONTEXT *StreamContext,
+	_Out_ BOOLEAN *ContextCreated
+);
+
 
 
 #endif

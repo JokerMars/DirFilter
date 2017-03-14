@@ -29,11 +29,22 @@ VOID ClearCipherExtensionList();
 
 VOID ClearNodeList(PLIST_ENTRY head);
 
+/*
+添加附加数据流，同时，过滤文件类型
+*/
 BOOLEAN AddFileFlag(
 	PFLT_CALLBACK_DATA Data,
 	PCFLT_RELATED_OBJECTS FltObjects
 );
 
+/*
+	给文件添加flag或者，检查是否存在flag
+*/
+BOOLEAN CreateOrOpenFileWithFlag(
+	PFLT_CALLBACK_DATA Data,
+	PCFLT_RELATED_OBJECTS FltObjects,
+	ULONG CreateDisposition
+);
 
 
 #endif

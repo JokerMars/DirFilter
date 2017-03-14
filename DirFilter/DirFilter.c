@@ -86,6 +86,25 @@ CONST FLT_OPERATION_REGISTRATION Callbacks[] = {
     { IRP_MJ_OPERATION_END }
 };
 
+
+//
+// 上下文结构
+//
+
+CONST FLT_CONTEXT_REGISTRATION Context_Array[]={
+	{
+		FLT_STREAM_CONTEXT,
+		0,
+		NULL,
+		STREAM_CONTEXT_SIZE,
+		STREAM_CONTEXT_TAG
+	},
+
+	{FLT_CONTEXT_END}
+};
+
+
+
 //
 //  This defines what we want to filter with FltMgr
 //
@@ -96,7 +115,7 @@ CONST FLT_REGISTRATION FilterRegistration = {
     FLT_REGISTRATION_VERSION,           //  Version
     0,                                  //  Flags
 
-    NULL,                               //  Context
+    Context_Array,                               //  Context
     Callbacks,                          //  Operation callbacks
 
     DirFilterUnload,                           //  MiniFilterUnload

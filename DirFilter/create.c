@@ -60,16 +60,14 @@ PreCreate(
 		//
 
 		createOptions = Data->Iopb->Parameters.Create.Options >> 24;
-		if (createOptions != FILE_SUPERSEDE&&
+		/*if (createOptions != FILE_SUPERSEDE&&
 			createOptions != FILE_OVERWRITE&&
 			createOptions != FILE_OVERWRITE_IF&&
 			createOptions != FILE_CREATE&&
 			createOptions != FILE_OPEN_IF)
 		{
 			leave;
-		}
-
-		
+		}*/
 
 
 		retVal = FLT_PREOP_SUCCESS_WITH_CALLBACK;
@@ -93,13 +91,31 @@ PostCreate(
 	__in FLT_POST_OPERATION_FLAGS Flags
 )
 {
-	KIRQL irql = KeGetCurrentIrql();
+	NTSTATUS status;
+	PSTREAM_CONTEXT pStreamCtx = NULL;
+	BOOLEAN newCreated = FALSE;
 
-	//DbgPrint("\tIRQL: %d\n", irql);
 
-	if (AddFileFlag(Data, FltObjects))
+	try
 	{
-		DbgPrint("\tFile Flag Added!\n");
+		if (!NT_SUCCESS(Data->IoStatus.Status))
+		{
+			leave;
+		}
+
+		if (!CreateOrOpenFileWithFlag(Data, FltObjects, FILE_OPEN))
+		{
+			leave;
+		}
+
+
+	}
+	finally
+	{
+		if (pStreamCtx)
+		{
+			FltReleaseContext(pStreamCtx);
+		}
 	}
 
 	return FLT_POSTOP_FINISHED_PROCESSING;
