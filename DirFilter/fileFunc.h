@@ -40,11 +40,17 @@ BOOLEAN AddFileFlag(
 /*
 	给文件添加flag或者，检查是否存在flag
 */
-BOOLEAN CreateOrOpenFileWithFlag(
+ULONG CreateOrOpenFileWithFlag(
 	PFLT_CALLBACK_DATA Data,
 	PCFLT_RELATED_OBJECTS FltObjects,
 	ULONG CreateDisposition
 );
+
+
+#define RET_NORMAL_FAIL				0
+#define RET_NOT_FILE_TYPE			1
+#define RET_CREATE_OPEN_FAIL		2
+#define RET_CREATE_OPEN_SUCCEED		3
 
 
 #endif

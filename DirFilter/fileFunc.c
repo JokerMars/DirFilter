@@ -264,7 +264,7 @@ BOOLEAN AddFileFlag(
 }
 
 
-BOOLEAN CreateOrOpenFileWithFlag(
+ULONG CreateOrOpenFileWithFlag(
 	PFLT_CALLBACK_DATA Data,
 	PCFLT_RELATED_OBJECTS FltObjects,
 	ULONG CreateDisposition
@@ -277,6 +277,8 @@ BOOLEAN CreateOrOpenFileWithFlag(
 	OBJECT_ATTRIBUTES oa;
 	UNICODE_STRING path = { 0 };
 	PFLT_FILE_NAME_INFORMATION nameInfo = NULL;
+
+	ULONG retVal = RET_NORMAL_FAIL;
 
 	try
 	{
@@ -301,6 +303,7 @@ BOOLEAN CreateOrOpenFileWithFlag(
 
 		if (!IsMonitoredExtension(&(nameInfo->Extension)))
 		{
+			retVal = RET_NOT_FILE_TYPE;
 			leave;
 		}
 
@@ -342,6 +345,9 @@ BOOLEAN CreateOrOpenFileWithFlag(
 		{
 			DbgPrint("\tIoStatus.Info: %d\n", ioStatus.Information);
 			DbgPrint("****IoStatus Status: %d\n", ioStatus.Status);
+
+			retVal = RET_CREATE_OPEN_FAIL;
+
 			leave;
 		}
 
@@ -350,9 +356,7 @@ BOOLEAN CreateOrOpenFileWithFlag(
 		else
 			DbgPrint("\tFile Opened!\n");
 
-
-
-		return TRUE;
+		retVal = RET_CREATE_OPEN_SUCCEED;
 	}
 	finally
 	{
@@ -372,5 +376,5 @@ BOOLEAN CreateOrOpenFileWithFlag(
 		}
 	}
 
-	return FALSE;
+	return retVal;
 }

@@ -93,8 +93,10 @@ PostCreate(
 {
 	NTSTATUS status;
 	PSTREAM_CONTEXT pStreamCtx = NULL;
-	BOOLEAN newCreated = FALSE;
+	BOOLEAN bNewCreated = FALSE;
 
+	ULONG retVal;
+	ULONG createOptions = Data->Iopb->Parameters.Create.Options >> 24;
 
 	try
 	{
@@ -103,11 +105,71 @@ PostCreate(
 			leave;
 		}
 
-		if (!CreateOrOpenFileWithFlag(Data, FltObjects, FILE_OPEN))
+		//
+		// 尝试打开：flag文件，如果成功则说明文件已加密,失败则查看是否为新生文件
+		//
+
+		retVal = CreateOrOpenFileWithFlag(Data, FltObjects, FILE_OPEN);
+		if (retVal < RET_CREATE_OPEN_FAIL)
 		{
 			leave;
 		}
 
+		//
+		// 创建或 获取上下文
+		//
+
+		status = Ctx_FindOrCreateStreamContext(Data, FltObjects, TRUE, &pStreamCtx, &bNewCreated);
+		if (!NT_SUCCESS(status))
+		{
+			leave;
+		}
+
+		if (!bNewCreated)
+		{
+			leave;
+		}
+
+		DbgPrint("\tContext Created\n");
+
+		//
+		// 打开：flag文件成功，说明文件已经加密
+		//
+
+		if (retVal == RET_CREATE_OPEN_SUCCEED)
+		{
+
+			pStreamCtx->bHasWrittenData = FALSE;
+			pStreamCtx->bIsThereAFlag = TRUE;
+			pStreamCtx->bNeedDecrypt = TRUE;
+			pStreamCtx->bNeedEncrypt = TRUE;
+
+		}
+
+		//
+		//打开：flag文件失败，这是需要考虑是否为新建文件，如果不是，说明只是普通文件放过
+		//
+
+		if (retVal == RET_CREATE_OPEN_FAIL)
+		{
+			if (createOptions != FILE_SUPERSEDE&&
+				createOptions != FILE_OVERWRITE&&
+				createOptions != FILE_OVERWRITE_IF&&
+				createOptions != FILE_CREATE&&
+				createOptions != FILE_OPEN_IF)
+			{
+				leave;
+			}
+
+			pStreamCtx->bHasWrittenData = FALSE;
+			pStreamCtx->bIsThereAFlag = FALSE;
+			pStreamCtx->bNeedDecrypt = TRUE;
+			pStreamCtx->bNeedEncrypt = TRUE;
+
+		}
+
+
+		DbgPrint("\tPostCreate Ended!\n");
 
 	}
 	finally
