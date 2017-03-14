@@ -8,16 +8,7 @@ PreCreate(
 )
 {
 	ULONG createOptions;
-	PFLT_FILE_NAME_INFORMATION nameInfo = NULL;
 	FLT_PREOP_CALLBACK_STATUS retVal = FLT_PREOP_SUCCESS_NO_CALLBACK;
-
-	NTSTATUS status;
-	HANDLE hFile = NULL;
-	IO_STATUS_BLOCK ioStatus;
-
-	OBJECT_ATTRIBUTES oa;
-	UNICODE_STRING path = { 0 };
-	
 
 	PAGED_CODE();
 
@@ -65,18 +56,62 @@ PreCreate(
 
 
 		//
-		//文件创建行为
+		//文件创建行为,实际写入文件的
 		//
 
 		createOptions = Data->Iopb->Parameters.Create.Options >> 24;
-		/*if (createOptions != FILE_SUPERSEDE&&
+		if (createOptions != FILE_SUPERSEDE&&
 			createOptions != FILE_OVERWRITE&&
 			createOptions != FILE_OVERWRITE_IF&&
 			createOptions != FILE_CREATE&&
 			createOptions != FILE_OPEN_IF)
 		{
 			leave;
-		}*/
+		}
+
+		
+
+
+		retVal = FLT_PREOP_SUCCESS_WITH_CALLBACK;
+
+	}
+	finally
+	{
+		
+
+	}
+
+	return retVal;
+}
+
+
+FLT_POSTOP_CALLBACK_STATUS
+PostCreate(
+	__inout PFLT_CALLBACK_DATA Data,
+	__in PCFLT_RELATED_OBJECTS FltObjects,
+	__inout_opt PVOID CompletionContext,
+	__in FLT_POST_OPERATION_FLAGS Flags
+)
+{
+	KIRQL irql = KeGetCurrentIrql();
+
+	//DbgPrint("\tIRQL: %d\n", irql);
+
+	NTSTATUS status;
+	HANDLE hFile = NULL;
+	IO_STATUS_BLOCK ioStatus;
+
+	OBJECT_ATTRIBUTES oa;
+	UNICODE_STRING path = { 0 };
+	PFLT_FILE_NAME_INFORMATION nameInfo = NULL;
+
+
+	try
+	{
+		if (!NT_SUCCESS(Data->IoStatus.Status))
+		{
+			leave;
+		}
 
 		status = FltGetFileNameInformation(Data,
 			FLT_FILE_NAME_OPENED | FLT_FILE_NAME_QUERY_FILESYSTEM_ONLY,
@@ -104,13 +139,11 @@ PreCreate(
 
 
 		DbgPrint("\nIRP_MJ_CREATE:\n");
-		DbgPrint("\tCreate Options: %d\n", createOptions);
-		DbgPrint("\tProcess Name: %s\n", procName);
 		DbgPrint("\tFile Name: %wZ\n", nameInfo->Name);
 		DbgPrint("\tFile Extension: %wZ\n", nameInfo->Extension);
 
-		
-	/*	path.MaximumLength = nameInfo->Name.MaximumLength + 10 * sizeof(WCHAR);
+
+		path.MaximumLength = nameInfo->Name.MaximumLength + 10 * sizeof(WCHAR);
 		path.Buffer = ExAllocatePool(NonPagedPool, path.MaximumLength);
 
 		RtlAppendUnicodeStringToString(&path, &nameInfo->Name);
@@ -139,15 +172,15 @@ PreCreate(
 
 		if (!NT_SUCCESS(status))
 		{
+			DbgPrint("\tIoStatus.Info: %d\n", ioStatus.Information);
 			DbgPrint("****IoStatus Status: %d\n", ioStatus.Status);
 			leave;
 		}
 
 		DbgPrint("\tFile Created!\n");
-*/
 
 
-		retVal = FLT_PREOP_SUCCESS_WITH_CALLBACK;
+
 
 	}
 	finally
@@ -166,25 +199,9 @@ PreCreate(
 		{
 			FltClose(hFile);
 		}
-
 	}
-
-	return retVal;
-}
-
-
-FLT_POSTOP_CALLBACK_STATUS
-PostCreate(
-	__inout PFLT_CALLBACK_DATA Data,
-	__in PCFLT_RELATED_OBJECTS FltObjects,
-	__inout_opt PVOID CompletionContext,
-	__in FLT_POST_OPERATION_FLAGS Flags
-)
-{
-	KIRQL irql = KeGetCurrentIrql();
-
-	DbgPrint("\tIRQL: %d\n", irql);
 	
+
 
 
 	return FLT_POSTOP_FINISHED_PROCESSING;

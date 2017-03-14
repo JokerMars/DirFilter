@@ -88,7 +88,7 @@ VOID InitializeCipherExtensionList()
 
 	InitializeListHead(&CipherExtensionList);
 	isOk = InsertNodeToList(L"dwg");
-	//isOk = InsertNodeToList(L"tmp");
+	isOk = InsertNodeToList(L"tmp");
 
 	if (isOk)
 	{
